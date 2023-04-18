@@ -151,6 +151,7 @@ class layout_object():
 
 class gui():
 	def __init__(self, menu_def=None, container_type="frame"):
+		self.defaults = elements_defaults
 		path = os.path.join(os.path.expanduser("~"), '.gui')
 		if not os.path.exists(path):
 			fs.mkdir(path)
@@ -243,8 +244,8 @@ class gui():
 
 	def set_element_default(self, element, key, val):
 		try:
-			elements_defaults[element][key] = val
-			string = f"elements_defaults = {elements_defaults}"
+			self.defaults[element][key] = val
+			string = f"self.defaults = {self.defaults}"
 			with open('element_data.py', 'w') as f:
 				f.write(string)
 				f.close()
@@ -496,18 +497,21 @@ class gui():
 	def _element(self, element, data={}, **args):
 		if data != {}:
 			args = data
-		defaults = elements_defaults[element]
-		for k in args.keys():
-			defaults[k] = args[k]
+		d = {}
+		defaults = self.defaults[element]
 		for k in defaults.keys():
 			val = defaults[k]
+			d[k] = val
 			globals()[k] = val
-		defaults['element_type'] = element
+		for k in args.keys():
+			d[k] = args[k]
+			globals()[k] = args[k]
+		d['element_type'] = element
 		if element != 'Tab' and element != 'Frame' and element != 'TabGroup' and element != 'Column':	
-			self.element_data[key] = defaults
+			self.element_data[key] = d
 		else:
-			defaults['layout'] = []
-			self.element_data[key] = defaults
+			d['layout'] = []
+			self.element_data[key] = d
 		if element == 'Button':
 			return sg.Button(button_text=button_text, button_type=button_type, target=target, tooltip=tooltip, file_types=file_types, initial_folder=initial_folder, default_extension=default_extension, disabled=disabled, change_submits=change_submits, enable_events=enable_events, image_filename=image_filename, image_data=image_data, image_size=image_size, image_subsample=image_subsample, image_source=image_source, border_width=border_width, size=size, auto_size_button=auto_size_button, button_color=button_color, disabled_button_color=disabled_button_color, highlight_colors=highlight_colors, mouseover_colors=mouseover_colors, use_ttk_buttons=use_ttk_buttons, font=font, bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, right_click_menu=right_click_menu, expand_x=expand_x, expand_y=expand_y, visible=visible, metadata=metadata)
 		elif element == 'ButtonMenu':
@@ -571,7 +575,7 @@ class gui():
 		elif element == 'Tree':
 			return sg.Tree(data=data, headings=headings, visible_column_map=visible_column_map, col_widths=col_widths, col0_width=col0_width, col0_heading=col0_heading, def_col_width=def_col_width, auto_size_columns=auto_size_columns, max_col_width=max_col_width, select_mode=select_mode, show_expanded=show_expanded, change_submits=change_submits, enable_events=enable_events, font=font, justification=justification, text_color=text_color, border_width=border_width, background_color=background_color, selected_row_colors=selected_row_colors, header_text_color=header_text_color, header_background_color=header_background_color, header_font=header_font, header_border_width=header_border_width, header_relief=header_relief, num_rows=num_rows, row_height=row_height, pad=pad, key=key, tooltip=tooltip, right_click_menu=right_click_menu, expand_x=expand_x, expand_y=expand_y, visible=visible, metadata=metadata)
 		elif element == 'FolderBrowse':
-			return sg.FolderBrowse(button_text=button_text, target=target, initial_folder=initial_folder, tooltip=tooltip, size=size, auto_size_button=auto_size_button, button_color=button_color, disabled=disabled, change_submits=change_submits, enable_events=enable_events, font=font, pad=pad, key=key, visible=visible, metadata=metadata, expand_x=expand_x, expand_y=expand_y)
+			return sg.FolderBrowse(button_text=button_text, target=target, initial_folder=initial_folder, tooltip=tooltip, size=size, auto_size_button=auto_size_button, button_color=button_color, disabled=disabled, change_submits=change_submits, enable_events=enable_events, font=font, pad=pad, key=key, visible=visible, metadata=metadata)
 		elif element == 'FilesBrowse':
 			return sg.FilesBrowse(button_text=button_text, target=target, file_types=file_types, disabled=disabled, initial_folder=initial_folder, tooltip=tooltip, size=size, auto_size_button=auto_size_button, button_color=button_color, change_submits=change_submits, enable_events=enable_events, font=font, pad=pad, key=key, visible=visible, files_delimiter=files_delimiter, metadata=metadata, expand_x=expand_x, expand_y=expand_y)
 		elif element == 'FileSaveAs':
